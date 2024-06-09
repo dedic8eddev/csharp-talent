@@ -1,0 +1,21 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "searchServiceName": {
+      "value": "test-parsnipssearchservice"
+    },
+    "searchServiceSku": {
+      "value": "basic"
+    },
+    "searchServiceReplicaCount": {
+      "value": 1
+    },
+    "searchServicePartitionCount": {
+      "value": 1
+    },
+    "searchServiceHostingMode": {
+      "value": "default"
+    }
+  }
+}

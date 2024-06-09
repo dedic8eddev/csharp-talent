@@ -1,0 +1,175 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the WebApp the settings are for."
+      }
+    },
+
+    "identityServerBaseUrl": {
+      "type": "string"
+    },
+    "identityServerClientSecret": {
+      "type": "securestring"
+    },
+
+    "dataPoolBaseUrl": {
+      "type": "string"
+    },
+
+    /* AZURE SEARCH */
+
+    "azureSearchServiceName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Azure Search service name."
+      }
+    },
+    "azureSearchIndexName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Azure Search index name."
+      }
+    },
+
+    /* Azure Maps */
+
+    "azureMapsName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Azure Maps name."
+      }
+    },
+
+    /* ROCKET REACH */
+
+    "rocketReachApiKey": {
+      "type": "securestring"
+    },
+    "rocketReachBaseUrl": {
+      "type": "string",
+      "defaultValue": ""
+    },
+
+    /* CHARGEBEE */
+
+    "chargebeeSecuritySettingsWebHookApiKey": {
+      "type": "securestring"
+    },
+    "chargebeeSettingsSiteName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "chargebeeSettingsApiKey": {
+      "type": "securestring"
+    },
+    "chargebeeTrialEndsOn": {
+      "type": "string",
+      "defaultValue": "20210101"
+    },
+    "chargebeeTrialLengthMonths": {
+      "type": "int",
+      "defaultValue": 1
+    },
+
+
+    "enableSwagger": {
+      "type": "bool"
+    },
+
+    /* Recaptcha */
+    "recaptchaSecretSettings": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "recaptchaBaseUrlSettings": {
+      "type": "string",
+      "defaultValue": "https://www.google.com/recaptcha/api"
+    },
+    "userSettingsEnableInvitedUserOnCreation": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "userSettingsDoNotScheduleInvitationEmail": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "userSettingsCreateActiveFakeSubscription": {
+      "type": "bool",
+      "defaultValue": false
+    }
+  },
+  "variables": {
+    "insightsName": "[concat(parameters('webSiteName'), 'Insights')]",
+    "stagingSlotName": "Staging"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('webSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "properties": {
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "[variables('stagingSlotName')]",
+          "type": "slots",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('webSiteName'))]"
+          ],
+          "properties": {
+          },
+          "resources": [
+            {
+              "name": "appsettings",
+              "type": "config",
+              "apiVersion": "2015-08-01",
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/Sites/Slots', parameters('webSiteName'), variables('stagingSlotName'))]"
+              ],
+              "tags": {
+                "displayName": "WebAppSettings"
+              },
+              "properties": {
+                "ApplicationInsights:InstrumentationKey": "[reference(resourceId('Microsoft.Insights/components', variables('insightsName')), '2014-04-01').InstrumentationKey]",
+                "IdentityAdminApiSettings:BaseUrl": "[parameters('identityServerBaseUrl')]",
+                "IdentityAdminApiSettings:ClientSecret": "[parameters('identityServerClientSecret')]",
+                "DataPoolApiSettings:AuthServerBaseUrl": "[parameters('identityServerBaseUrl')]",
+                "DataPoolApiSettings:BaseUrl": "[parameters('dataPoolBaseUrl')]",
+                "DataPoolApiSettings:ClientSecret": "[parameters('identityServerClientSecret')]",
+                "BearerTokenAuthSettings:Authority": "[parameters('identityServerBaseUrl')]",
+                "EnableSwagger": "[parameters('enableSwagger')]",
+                "AzureSearchSettings:QueryAPIKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', parameters('azureSearchServiceName')), '2015-08-19').PrimaryKey]",
+                "AzureSearchSettings:SearchServiceName": "[parameters('azureSearchServiceName')]",
+                "AzureSearchSettings:PersonIndexName": "[parameters('azureSearchIndexName')]",
+                "RocketReachSettings:ApiKey": "[parameters('rocketReachApiKey')]",
+                "RocketReachSettings:BaseUrl": "[parameters('rocketReachBaseUrl')]",
+                "ChargebeeSecuritySettings:WebHookApiKey": "[parameters('chargebeeSecuritySettingsWebHookApiKey')]",
+                "ChargebeeSettings:SiteName": "[parameters('chargebeeSettingsSiteName')]",
+                "ChargebeeSettings:ApiKey": "[parameters('chargebeeSettingsApiKey')]",
+                "ChargebeeSettings:TrialEndsOn": "[parameters('chargebeeTrialEndsOn')]",
+                "ChargebeeSettings:TrialLengthMonths": "[parameters('chargebeeTrialLengthMonths')]",
+                "RecaptchaSettings:Secret": "[parameters('recaptchaSecretSettings')]",
+                "RecaptchaSettings:BaseUrl": "[parameters('recaptchaBaseUrlSettings')]",
+                "UserSettings:EnableInvitedUserOnCreation": "[parameters('userSettingsEnableInvitedUserOnCreation')]",
+                "UserSettings:DoNotScheduleInvitationEmail": "[parameters('userSettingsDoNotScheduleInvitationEmail')]",
+                "UserSettings:CreateActiveFakeSubscription": "[parameters('userSettingsCreateActiveFakeSubscription')]",
+                "AzureMapsSettings:SubscriptionKey": "[listKeys(resourceId('Microsoft.Maps/accounts', parameters('azureMapsName')), '2021-02-01').PrimaryKey]"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

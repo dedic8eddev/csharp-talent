@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties templates_4cosmosdb_1template_1json__JsonSchema="https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json" /></VisualStudio></ProjectExtensions>
+
+</Project>

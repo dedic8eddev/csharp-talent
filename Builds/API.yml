@@ -1,0 +1,122 @@
+name: 1.0$(rev:.r).0
+
+trigger:
+  branches:
+    include:
+      - master
+
+variables:
+  buildConfiguration: Release
+
+stages:
+  - stage: BuildandTest
+
+    pool:
+      vmImage: "windows-latest"
+
+    jobs:
+      - job: BuildApi
+        displayName: "Build Api and Functions"
+        workspace:
+          clean: all
+
+        steps:
+          - pwsh: |
+              Write-Host "Starting CosmosDB Emulator"
+              Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+              Start-CosmosDbEmulator -NoUI
+            displayName: "Start Cosmos DB Emulator"
+            failOnStderr: true
+            errorActionPreference: stop
+            env:
+              AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE : false
+
+          - task: PowerShell@2
+            displayName: 'Start Azure Storage Emulator'
+            inputs:
+              targetType: 'inline'
+              script: |
+                npm install -g azurite
+                Start-Process powershell.exe azurite 
+              
+          - task: DotNetCoreCLI@2
+            displayName: Restore packages
+            inputs:
+              command: restore
+              feedsToUse: 'select'
+              vstsFeed: 'IkiruPeopleArtifactsFeed'
+              projects: "Ikiru.Parsnips.Api/Ikiru.Parsnips.Api.csproj"
+              includeNuGetOrg: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish Api
+            inputs:
+              command: publish
+              projects: "Ikiru.Parsnips.Api/Ikiru.Parsnips.Api.csproj"
+              arguments: '-c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)\API /p:Version=$(Build.BuildNumber) --no-restore'
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore packages
+            inputs:
+              command: restore
+              feedsToUse: 'select'
+              vstsFeed: 'IkiruPeopleArtifactsFeed'
+              projects: "Ikiru.Parsnips.Functions/Ikiru.Parsnips.Functions.csproj"
+              includeNuGetOrg: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish Functions
+            inputs:
+              command: publish
+              publishWebProjects: false
+              projects: "Ikiru.Parsnips.Functions/Ikiru.Parsnips.Functions.csproj"
+              arguments: '-c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)\Functions --no-restore'         
+              
+          - task: DotNetCoreCLI@2
+            displayName: Test
+            inputs:
+              command: test
+              projects: "**/*[Tt]ests/*.csproj"
+              arguments: "--configuration $(buildConfiguration)"
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact: Api"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\API'
+              ArtifactName: Api
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact: Functions"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\Functions'
+              ArtifactName: Functions
+
+      - job: PublishArm
+        displayName: "Publish ARM Templates"
+
+        steps:
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact: ARM_Templates"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\Ikiru.Parsnips.Api.Deployment\'
+              ArtifactName: ARM_Templates
+
+  # Dev - Deploy Stage
+  - template: API_Deploy.yml
+    parameters:
+      EnvName: Dev
+      AzureSub: "FP Development"
+
+  # Future - Should we trigger Auto Tests for Front Ends here and ensure they pass?
+
+  # Test - Deploy Stage
+  - template: API_Deploy.yml
+    parameters:
+      EnvName: Test
+      AzureSub: "FP Development"
+
+  # Live - Deploy Stage
+  - template: API_Deploy.yml
+    parameters:
+      EnvName: Live
+      AzureSub: "FP Production"

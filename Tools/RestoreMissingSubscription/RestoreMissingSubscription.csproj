@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ikiru.Parsnips.Api\Ikiru.Parsnips.Api.csproj" />
+    <ProjectReference Include="..\..\Ikiru.Parsnips.Domain\Ikiru.Parsnips.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

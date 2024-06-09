@@ -1,0 +1,83 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Api", "Ikiru.Parsnips.Api\Ikiru.Parsnips.Api.csproj", "{303082E0-D61B-4967-8692-AB46EB7E1052}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Api.Deployment", "Ikiru.Parsnips.Api.Deployment\Ikiru.Parsnips.Api.Deployment.csproj", "{923C211C-2E62-48B4-877A-34561CE37851}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.IntegrationTests", "Ikiru.Parsnips.IntegrationTests\Ikiru.Parsnips.IntegrationTests.csproj", "{BB6FBC94-4C9A-4FBF-A8E4-68017F7424B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.UnitTests", "Ikiru.Parsnips.UnitTests\Ikiru.Parsnips.UnitTests.csproj", "{29ECDA1A-FC65-496A-914C-AC5761DE70AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Functions", "Ikiru.Parsnips.Functions\Ikiru.Parsnips.Functions.csproj", "{EEE98F44-2E62-4343-9988-E217A266C517}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Domain", "Ikiru.Parsnips.Domain\Ikiru.Parsnips.Domain.csproj", "{FC0C9014-07FC-4FB4-8AC8-8DDE5BE5A04F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.DomainInfrastructure", "Ikiru.Parsnips.DomainInfrastructure\Ikiru.Parsnips.DomainInfrastructure.csproj", "{B4C0DA5B-D637-4FB3-9522-F2238DB21804}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Shared.Infrastructure", "Ikiru.Parsnips.Shared.Infrastructure\Ikiru.Parsnips.Shared.Infrastructure.csproj", "{11D99EA7-4579-4DD6-A6AA-345ACECDE488}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Application", "Ikiru.Parsnips.Application\Ikiru.Parsnips.Application.csproj", "{82DFF7A8-C9DE-4AD1-BF55-51F2FA19A6C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Infrastructure", "Ikiru.Parsnips.Infrastructure\Ikiru.Parsnips.Infrastructure.csproj", "{2F891ECB-49F1-46E1-8D18-499995DCB5F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ikiru.Parsnips.Portal.Api", "Ikiru.Parsnips.Portal.Api\Ikiru.Parsnips.Portal.Api.csproj", "{FB2C91A0-86BB-43C7-AD50-522C204167E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{303082E0-D61B-4967-8692-AB46EB7E1052}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{303082E0-D61B-4967-8692-AB46EB7E1052}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{303082E0-D61B-4967-8692-AB46EB7E1052}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{303082E0-D61B-4967-8692-AB46EB7E1052}.Release|Any CPU.Build.0 = Release|Any CPU
+		{923C211C-2E62-48B4-877A-34561CE37851}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{923C211C-2E62-48B4-877A-34561CE37851}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB6FBC94-4C9A-4FBF-A8E4-68017F7424B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB6FBC94-4C9A-4FBF-A8E4-68017F7424B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB6FBC94-4C9A-4FBF-A8E4-68017F7424B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB6FBC94-4C9A-4FBF-A8E4-68017F7424B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29ECDA1A-FC65-496A-914C-AC5761DE70AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29ECDA1A-FC65-496A-914C-AC5761DE70AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29ECDA1A-FC65-496A-914C-AC5761DE70AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29ECDA1A-FC65-496A-914C-AC5761DE70AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEE98F44-2E62-4343-9988-E217A266C517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEE98F44-2E62-4343-9988-E217A266C517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEE98F44-2E62-4343-9988-E217A266C517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEE98F44-2E62-4343-9988-E217A266C517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC0C9014-07FC-4FB4-8AC8-8DDE5BE5A04F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC0C9014-07FC-4FB4-8AC8-8DDE5BE5A04F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC0C9014-07FC-4FB4-8AC8-8DDE5BE5A04F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC0C9014-07FC-4FB4-8AC8-8DDE5BE5A04F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4C0DA5B-D637-4FB3-9522-F2238DB21804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C0DA5B-D637-4FB3-9522-F2238DB21804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C0DA5B-D637-4FB3-9522-F2238DB21804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C0DA5B-D637-4FB3-9522-F2238DB21804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11D99EA7-4579-4DD6-A6AA-345ACECDE488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11D99EA7-4579-4DD6-A6AA-345ACECDE488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11D99EA7-4579-4DD6-A6AA-345ACECDE488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11D99EA7-4579-4DD6-A6AA-345ACECDE488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82DFF7A8-C9DE-4AD1-BF55-51F2FA19A6C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82DFF7A8-C9DE-4AD1-BF55-51F2FA19A6C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82DFF7A8-C9DE-4AD1-BF55-51F2FA19A6C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82DFF7A8-C9DE-4AD1-BF55-51F2FA19A6C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F891ECB-49F1-46E1-8D18-499995DCB5F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F891ECB-49F1-46E1-8D18-499995DCB5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F891ECB-49F1-46E1-8D18-499995DCB5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F891ECB-49F1-46E1-8D18-499995DCB5F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB2C91A0-86BB-43C7-AD50-522C204167E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB2C91A0-86BB-43C7-AD50-522C204167E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB2C91A0-86BB-43C7-AD50-522C204167E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB2C91A0-86BB-43C7-AD50-522C204167E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F9A58F10-9F08-4B08-984D-85B250CBDF43}
+	EndGlobalSection
+EndGlobal

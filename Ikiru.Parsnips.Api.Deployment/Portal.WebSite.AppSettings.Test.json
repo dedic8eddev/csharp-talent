@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "value": "Test-PortalApi"
+    },
+    "identityServerBaseUrl": {
+      "value": "https://test-is-app.talentis.global/"
+    },
+    "identityServerClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "Test-IdentityServerAdminApiClientSecret"
+      }
+    },
+    "dataPoolBaseUrl": {
+      "value": "https://test-datapool-app.talentis.global/"
+    },
+    "enableSwagger": {
+      "value": true
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "value": "Test-ParsnipsApi"
+    },
+    "identityServerBaseUrl": {
+      "value": "https://test-is-app.talentis.global/"
+    },
+    "identityServerClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "Test-IdentityServerAdminApiClientSecret"
+      }
+    },
+    "dataPoolBaseUrl": {
+      "value": "https://test-datapool-app.talentis.global/"
+    },
+    "azureSearchServiceName": {
+      "value": "test-parsnipssearchservice"
+    },
+    "azureSearchIndexName": {
+      "value": "persons-index"
+    },
+    "azureMapsName": {
+      "value": "Test-ParsnipsMaps"
+    },
+    "rocketReachBaseUrl": {
+      "value": "https://api.rocketreach.co/v2/api"
+    },
+    "rocketReachApiKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "RocketReachApiKey"
+      }
+    },
+    "chargebeeSecuritySettingsWebHookApiKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "Test-ChargebeeWebHookApiKey"
+      }
+    },
+    "enableSwagger": {
+      "value": true
+    },
+    "recaptchaSecretSettings": {
+      "value": "6LdWfeQZAAAAAEYGGD2lCZhNqsKt1xairCX41L42"
+    },
+    "recaptchaBaseUrlSettings": {
+      "value": "https://www.google.com/recaptcha/api"
+    },
+    "chargebeeSettingsSiteName": {
+      "value": "talentis-test"
+    },
+    "chargebeeSettingsApiKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "Test-ChargebeeApiKey"
+      }
+    },
+    "chargebeeTrialEndsOn": {
+      "value": "20210101"
+    },
+    "chargebeeTrialLengthMonths": {
+      "value": 1
+    }
+  }
+}

@@ -1,0 +1,20 @@
+parameters:
+- name: 'EnvName'
+- name: 'AzureSub'
+
+stages:
+- stage: '${{ parameters.EnvName }}Deploy'
+  displayName: '${{ parameters.EnvName }} - Deploy'
+
+  jobs:
+  # Deploy Infrastructure Job
+  - template: Portal_DeployInfrastructure.yml
+    parameters:
+      EnvName: '${{ parameters.EnvName }}'
+      AzureSub: '${{ parameters.AzureSub }}'
+
+  # Deploy Apps Job
+  - template: Portal_DeployApps.yml
+    parameters:
+      EnvName: '${{ parameters.EnvName }}'
+      AzureSub: '${{ parameters.AzureSub }}'

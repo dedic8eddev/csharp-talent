@@ -1,0 +1,92 @@
+parameters:
+- name: 'EnvName'
+- name: 'AzureSub'
+
+jobs:
+- deployment: '${{ parameters.EnvName }}DeployApps'
+  displayName: '${{ parameters.EnvName }} - Deploy Apps'
+
+  # Run only once Infrastructure completed (Jobs by default run in parallel)
+  dependsOn: '${{ parameters.EnvName }}DeployInfrastructure' # References DeployInfrastructure Template value
+  condition: in(dependencies['${{ parameters.EnvName }}DeployInfrastructure'].result, 'Succeeded', 'Skipped')
+
+  pool:
+    vmImage: 'windows-latest'
+
+  environment: '${{ parameters.EnvName }}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+
+        - task: ExtractFiles@1
+          displayName: 'Unzip API'
+          inputs:
+            archiveFilePatterns: '$(Pipeline.Workspace)/Api/*.zip'
+            destinationFolder: '$(Pipeline.Workspace)/Api/Unzipped'
+            cleanDestinationFolder: true
+
+        - task: ExtractFiles@1
+          displayName: 'Unzip Functions'
+          inputs:
+            archiveFilePatterns: '$(Pipeline.Workspace)/Functions/*.zip'
+            destinationFolder: '$(Pipeline.Workspace)/Functions/Unzipped'
+            cleanDestinationFolder: true
+
+        - task: AzureAppServiceManage@0
+          displayName: 'Stop Functions'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            Action: 'Stop Azure App Service'
+            WebAppName: '$(Environment.Name)-ParsnipsApiFunctions'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Set API AppSettings'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/WebSite.AppSettings.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Api.WebSite.AppSettings.$(Environment.Name).json'
+
+        - task: AzureRmWebAppDeployment@4
+          displayName: 'Deploy Api to Staging slot'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            WebAppName: '$(Environment.Name)-ParsnipsApi'
+            deployToSlotOrASE: true
+            ResourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            SlotName: staging
+            packageForLinux: '$(Pipeline.Workspace)/Api/Unzipped'
+            enableCustomDeployment: true
+            TakeAppOfflineFlag: false
+            RemoveAdditionalFilesFlag: true
+            ExcludeFilesFromAppDataFlag: false
+
+        - task: AzureRmWebAppDeployment@4
+          displayName: 'Deploy Functions'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            appType: functionApp
+            WebAppName: '$(Environment.Name)-ParsnipsApiFunctions'
+            packageForLinux: '$(Pipeline.Workspace)/Functions/Unzipped'
+            enableCustomDeployment: true
+            TakeAppOfflineFlag: false
+            RemoveAdditionalFilesFlag: true
+            ExcludeFilesFromAppDataFlag: false
+
+        - task: AzureAppServiceManage@0
+          displayName: 'Swap Api into Production'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            WebAppName: '$(Environment.Name)-ParsnipsApi'
+            ResourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            SourceSlot: staging
+
+        - task: AzureAppServiceManage@0
+          displayName: 'Start Functions'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            Action: 'Start Azure App Service'
+            WebAppName: '$(Environment.Name)-ParsnipsApiFunctions'

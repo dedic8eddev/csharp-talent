@@ -1,0 +1,1 @@
+﻿.\InitialiseSecretsKeyVault.ps1 -SubscriptionId f81f8f6e-e744-4059-b7d1-815f0cf46d5a -Internal $false -LiveServicePrincipalObjectId 65a9b248-9ad2-46e2-a999-b0e3b62feaf2 -ResourceGroupName "LiveParsnipsDeploymentResGrp" -ResourceGroupLocation "UK South"

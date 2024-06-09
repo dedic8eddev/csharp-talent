@@ -1,0 +1,136 @@
+parameters:
+- name: 'EnvName'
+- name: 'AzureSub'
+
+jobs:
+- deployment: '${{ parameters.EnvName }}DeployInfrastructure' # Name referenced from DeployApps Template
+  displayName: '${{ parameters.EnvName }} - Deploy Infrastructure'
+
+  pool:
+    vmImage: 'windows-latest'
+    
+  # Allow Skipping of this Stage via Pipeline variable (set in DevOps UI)
+  condition: and(succeeded(), ne(variables['skipInfrastructure'], 'True'))
+
+  environment: '${{ parameters.EnvName }}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+          artifact: ARM_Templates
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create ActionGroup'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/ActionGroup.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/ActionGroup.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Cosmos DB'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/CosmosDb.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/CosmosDb.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Storage Account'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/StorageAccount.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/StorageAccount.$(Environment.Name).json'            
+
+        - task: AzurePowerShell@3
+          displayName: 'Create Storage Blob Containers'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            ScriptPath: '$(Pipeline.Workspace)/ARM_Templates/StorageAccount.Containers.$(Environment.Name).ps1'
+            ScriptArguments: '-ResourceGroupName $(Environment.Name)-ParsnipsResGrp'
+            azurePowerShellVersion: LatestVersion
+            
+        - task: AzurePowerShell@3
+          displayName: 'Create Storage Queues'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            ScriptPath: '$(Pipeline.Workspace)/ARM_Templates/StorageAccount.Queues.$(Environment.Name).ps1'
+            ScriptArguments: '-ResourceGroupName $(Environment.Name)-ParsnipsResGrp'
+            azurePowerShellVersion: LatestVersion
+            
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Search Service'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/SearchService.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/SearchService.$(Environment.Name).json'
+            
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Maps Service'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/Maps.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Maps.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create API Insights'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/Insights.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Api.Insights.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create API AppPlan'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/AppPlan.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Api.AppPlan.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create API Service'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/WebSite.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Api.WebSite.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Functions Insights'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/Insights.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Functions.Insights.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Functions AppPlan'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/AppPlan.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Functions.AppPlan.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Functions Service'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/FunctionApp.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Functions.FunctionApp.$(Environment.Name).json'

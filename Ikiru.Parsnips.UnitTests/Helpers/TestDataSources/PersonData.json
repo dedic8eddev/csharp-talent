@@ -1,0 +1,137 @@
+{
+  "id": "e1bc48b5-8985-4adc-9f81-7997cff67b0e",
+  "partitionKey": "e1bc48b5-8985-4adc-9f81-7997cff67b0e",
+  "location": {
+    "id": "f097409b-0c77-4671-ba2a-7d13b5cb32a3",
+    "addressLine": "12 CEDARWOOD CROCKFORD LANE,CHINEHAM,BASINGSTOKE,ENGLAND,RG24 8WD",
+    "countryName": "United Kingdom",
+    "countryCode": "UK",
+    "cityName": "Basingstoke",
+    "postalCode": "",
+    "geoLocation": {
+      "type": "Point",
+      "coordinates": [
+        -1.06853,
+        51.29315
+      ]
+    }
+  },
+  "personDetails": {
+    "name": "Steve Hammond",
+    "photoUrl": "http://cdn.com/image.png",
+    "biography": "someone who was somewhere once"
+  },
+    "websiteLinks": [
+      {
+        "id": "e81a7516-ce20-4f7b-8095-a127f8c040ea",
+        "linkTo": "Facebook",
+        "url": "http://www.facebook.com/something"
+      }
+    ],
+    "currentEmployment": {
+      "companyId": "c157ab1f-ac1b-4f15-a26d-0e3603ab993c",
+      "companyName": "Ikiru People Limited",
+      "companySectorCodes": [
+        "I123",
+        "I1234"
+      ],
+      "companyAddresses": [
+        {
+          "id": "f097409b-0c77-4671-ba2a-7d13b5cb32a3",
+          "addressLine": "12 CEDARWOOD CROCKFORD LANE,CHINEHAM,BASINGSTOKE,ENGLAND,RG24 8WD",
+          "countryName": "United Kingdom",
+          "countryCode": "UK",
+          "cityName": "Basingstoke",
+          "postalCode": "",
+          "geoLocation": {
+            "type": "Point",
+            "coordinates": [
+              -1.06853,
+              51.29315
+            ]
+          }
+        }
+      ],
+      "companyEmployeeTotal": 53,
+      "companyAnnualRevenue": 1250000,
+      "position": "Childcare moderator",
+      "salary": 8,
+      "startDate": "2020-04-01T00:00:00+00:00",
+      "endDate": null
+    },
+    "previousEmployment": [
+      {
+        "companyId": "9c22ef6d-a954-4eaa-a5fb-bf45e998b938",
+        "companyName": "Another comapny",
+        "companySectorCodes": [
+          "I123",
+          "I1234"
+        ],
+        "companyAddresses": [
+          {
+            "id": "c3132abd-d380-428c-8179-02cdbbe8c552",
+            "addressLine": "12 CEDARWOOD CROCKFORD LANE,CHINEHAM,BASINGSTOKE,ENGLAND,RG24 8WD",
+            "countryName": "United Kingdom",
+            "countryCode": "UK",
+            "cityName": "Basingstoke",
+            "postalCode": "",
+            "geoLocation": {
+              "type": "Point",
+              "coordinates": [
+                -1.06853,
+                51.29315
+              ]
+            }
+          }
+        ],
+        "companyEmployeeTotal": 7,
+        "companyAnnualRevenue": 1250000,
+        "position": "Worker person",
+        "startDate": null,
+        "endDate": null
+      },
+      {
+        "companyId": "f41cd69e-6959-495a-bee5-e438f54c8927",
+        "companyName": "One more company",
+        "companySectorCodes": [
+          "I123",
+          "I1234"
+        ],
+        "companyAddresses": [
+          {
+            "id": "9bcc4556-2a33-4b33-8521-baa474220c4a",
+            "addressLine": "12 CEDARWOOD CROCKFORD LANE,CHINEHAM,BASINGSTOKE,ENGLAND,RG24 8WD",
+            "countryName": "United Kingdom",
+            "countryCode": "UK",
+            "cityName": "Basingstoke",
+            "postalCode": "",
+            "geoLocation": {
+              "type": "Point",
+              "coordinates": [
+                -1.06853,
+                51.29315
+              ]
+            }
+          }
+        ],
+        "companyEmployeeTotal": 53,
+        "companyAnnualRevenue": 1250000,
+        "position": "trainee worker",
+        "startDate": "1990-01-01T00:00:00+00:00",
+        "endDate": "2014-12-31T00:00:00+00:00"
+      }
+    ],
+    "attributes": [
+      {
+        "id": "9a0eaae8-a64e-49f7-a179-76957f55f215",
+        "classification": "Education",
+        "value": "Some learning place"
+      },
+      {
+        "id": "ebc4ccf2-c698-4512-a0bd-7046e91b7c5d",
+        "classification": "Skill",
+        "value": "doing stuff ok"
+      }
+    ],
+    "isDeleted": false
+  }

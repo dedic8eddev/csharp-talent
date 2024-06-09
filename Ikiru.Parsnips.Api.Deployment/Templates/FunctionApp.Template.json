@@ -1,0 +1,315 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "functionsName": {
+      "type": "string"
+    },
+    "planName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the App Plan that the website should be in."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Storage Account to link to."
+      }
+    },
+    "cosmosDbAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the CosmosDb Account to link to."
+      }
+    },
+
+    "sovrenAccountId": {
+      "type": "securestring"
+    },
+    "sovrenAccountKey": {
+      "type": "securestring"
+    },
+
+    "smtpUsername": {
+      "type": "securestring"
+    },
+    "smtpPassword": {
+      "type": "securestring"
+    },
+
+    "talentisAppBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "With protocol and no path or trailing slash e.g. https://example.talentis.global"
+      }
+    },
+
+    "azureMapsName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Azure Maps instance to use."
+      }
+    },
+
+
+    "enableIPRestrictions": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Whether to enable the IP restrictions. Default is false as HTTP function needs external access from DataPool (and can't limit to Azure only easily. Any issues, split functions into public/non-pub or implement VNet and restrict to that."
+      }
+    },
+    "insightsDeveloperMode": {
+      "type": "string"
+    },
+    "alwaysOn": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Azure WebSite Always On, no warmup required."
+      }
+    },
+    "alertsActionGroupName": {
+      "type": "string"
+    },
+    "alertsNoRequestsThresholdMinutes": {
+      "type": "int",
+      "allowedValues": [
+        5,
+        10,
+        15,
+        30,
+        45,
+        60,
+        120,
+        180,
+        240,
+        300,
+        360,
+        1440,
+        2880
+      ]
+    },
+
+    /* Chargebee */
+
+    "chargebeeSettingsSiteName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "chargebeeSettingsApiKey": {
+      "type": "securestring"
+    },
+    "chargebeeTrialEndsOn": {
+      "type": "string",
+      "defaultValue": "20210101"
+    },
+    "chargebeeTrialLengthMonths": {
+      "type": "int",
+      "defaultValue": 1
+    },
+
+    /* Identity server */
+
+    "identityServerBaseUrl": {
+      "type": "string"
+    },
+    "identityServerClientSecret": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "functionAppId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('functionsName'))]",
+    "insightsName": "[concat(parameters('functionsName'), 'Insights')]",
+    "storageAccountNameLower": "[toLower(parameters('storageAccountName'))]",
+    "storageAccountId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountNameLower'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-02-01",
+      "name": "[parameters('functionsName')]",
+      "type": "Microsoft.Web/sites",
+      "properties": {
+        "name": "[parameters('functionsName')]",
+        "siteConfig": {
+          "alwaysOn": "[parameters('alwaysOn')]",
+          "connectionStrings": [
+            {
+              "name": "CosmosConnection",
+              "connectionString": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2019-12-12').connectionStrings[0].connectionString]",
+              "type": 3
+            }
+          ]
+        },
+        "clientAffinityEnabled": false,
+        "httpsOnly": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('planName'))]"
+      },
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('planName'))]": "Resource"
+      },
+      "kind": "functionapp",
+      "resources": [
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2018-02-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('functionsName'))]"
+          ],
+          "properties": {
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountNameLower'),';AccountKey=',listKeys(variables('storageAccountId'), '2015-05-01-preview').key1)]",
+            "FUNCTIONS_EXTENSION_VERSION": "~3",
+            "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
+            "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountNameLower'),';AccountKey=',listKeys(variables('storageAccountId'), '2015-05-01-preview').key1)]",
+            "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('functionsName')), '-prod')]",
+            "ApplicationInsights:InstrumentationKey": "[reference(resourceId('Microsoft.Insights/components', variables('insightsName')), '2014-04-01').InstrumentationKey]",
+            "ApplicationInsights:DeveloperMode": "[parameters('insightsDeveloperMode')]",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('insightsName')), '2014-04-01').InstrumentationKey]",
+            "sovrenSettings:accountId": "[parameters('sovrenAccountId')]",
+            "sovrenSettings:accountKey": "[parameters('sovrenAccountKey')]",
+            "smtpSendingSettings:username": "[parameters('smtpUsername')]",
+            "smtpSendingSettings:password": "[parameters('smtpPassword')]",
+            "emailContentSettings:talentisAppBaseUrl": "[parameters('talentisAppBaseUrl')]",
+            "azureMapsSettings:apiKey": "[listKeys(resourceId('Microsoft.Maps/accounts', parameters('azureMapsName')), '2018-05-01').primaryKey]",
+            "ChargebeeSettings:SiteName": "[parameters('chargebeeSettingsSiteName')]",
+            "ChargebeeSettings:ApiKey": "[parameters('chargebeeSettingsApiKey')]",
+            "ChargebeeSettings:TrialEndsOn": "[parameters('chargebeeTrialEndsOn')]",
+            "ChargebeeSettings:TrialLengthMonths": "[parameters('chargebeeTrialLengthMonths')]",
+            "IdentityAdminApiSettings:BaseUrl": "[parameters('identityServerBaseUrl')]",
+            "IdentityAdminApiSettings:ClientSecret": "[parameters('identityServerClientSecret')]"
+          }
+        },
+        {
+          "name": "web",
+          "condition": "[parameters('enableIPRestrictions')]",
+          "type": "config",
+          "apiVersion": "2018-02-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('functionsName'))]"
+          ],
+          "tags": {
+            "displayName": "Allowed IPs"
+          },
+          "properties": {
+            "ipSecurityRestrictions": [
+              {
+                "ipAddress": "217.13.135.114/32",
+                "action": "Allow",
+                "tag": "Default",
+                "priority": 1,
+                "name": "Basingstoke Office"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "[concat(parameters('functionsName'), 'ErrorsAlert')]",
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2018-04-16",
+      "location": "North Europe",
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', variables('insightsName')))]": "Resource"
+      },
+      "properties": {
+        "description": "[concat(parameters('functionsName'), ' Insights log has Trace messages with Severity Level is Error or greater in the last 5 mins')]",
+        "enabled": "true",
+        "source": {
+          "query": "traces | where severityLevel > 2",
+          "dataSourceId": "[resourceId('Microsoft.Insights/components', variables('insightsName'))]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 5
+        },
+        "action": {
+          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+          "severity": "0",
+          "aznsAction": {
+            "actionGroup": "[array(resourceId('Microsoft.Insights/actiongroups', parameters('alertsActionGroupName')))]",
+            "emailSubject": "[concat(parameters('functionsName'), ' Insights log has Trace messages with Severity Level: Error')]"
+          },
+          "trigger": {
+            "thresholdOperator": "GreaterThan",
+            "threshold": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('functionsName'), 'IncompleteAlert')]",
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2018-04-16",
+      "location": "North Europe",
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', variables('insightsName')))]": "Resource"
+      },
+      "properties": {
+        "description": "[concat(parameters('functionsName'), ' Insights requests in the last 5 minutes have had processes that have not succeeded.')]",
+        "enabled": "true",
+        "source": {
+          "query": "requests | where success == false",
+          "dataSourceId": "[resourceId('Microsoft.Insights/components', variables('insightsName'))]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 5
+        },
+        "action": {
+          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+          "severity": "0",
+          "aznsAction": {
+            "actionGroup": "[array(resourceId('Microsoft.Insights/actiongroups', parameters('alertsActionGroupName')))]",
+            "emailSubject": "[concat(parameters('functionsName'), ' Failed requests')]"
+          },
+          "trigger": {
+            "thresholdOperator": "GreaterThan",
+            "threshold": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('functionsName'), 'StoppedAlert')]",
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2018-04-16",
+      "location": "North Europe",
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', variables('insightsName')))]": "Resource"
+      },
+      "properties": {
+        "description": "[concat(parameters('functionsName'), ' Insights Requests has no entries in last ', parameters('alertsNoRequestsThresholdMinutes'), ' minutes.')]",
+        "enabled": "false",
+        "source": {
+          "query": "requests",
+          "dataSourceId": "[resourceId('Microsoft.Insights/components', variables('insightsName'))]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 10,
+          "timeWindowInMinutes": "[parameters('alertsNoRequestsThresholdMinutes')]"
+        },
+        "action": {
+          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+          "severity": "0",
+          "aznsAction": {
+            "actionGroup": "[array(resourceId('Microsoft.Insights/actiongroups', parameters('alertsActionGroupName')))]",
+            "emailSubject": "[concat(parameters('functionsName'), ' No Function requests logged')]"
+          },
+          "trigger": {
+            "thresholdOperator": "Equal",
+            "threshold": 0
+          }
+        }
+      }
+    }
+  ]
+}
+

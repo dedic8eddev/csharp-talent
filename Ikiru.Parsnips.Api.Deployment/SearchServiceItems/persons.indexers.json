@@ -1,0 +1,16 @@
+{
+  "name": "persons-indexer",
+  "description": "",
+  "dataSourceName": "persons-datasource",
+  "targetIndexName": "persons-index",
+  "schedule": {
+    "interval": "PT5M"
+  },
+  "parameters": {
+    "batchSize": null,
+    "maxFailedItems": 0,
+    "maxFailedItemsPerBatch": 0,
+    "base64EncodeKeys": false,
+    "configuration": {}
+  }
+}

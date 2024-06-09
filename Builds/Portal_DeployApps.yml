@@ -1,0 +1,49 @@
+parameters:
+- name: 'EnvName'
+- name: 'AzureSub'
+
+jobs:
+- deployment: '${{ parameters.EnvName }}DeployApps'
+  displayName: '${{ parameters.EnvName }} - Deploy Apps'
+  # Run only once Infrastructure completed (Jobs by default run in parallel)
+  dependsOn: '${{ parameters.EnvName }}DeployInfrastructure' # References DeployInfrastructure Template value
+  condition: in(dependencies['${{ parameters.EnvName }}DeployInfrastructure'].result, 'Succeeded', 'Skipped')
+
+  pool:
+    vmImage: 'windows-latest'
+
+  environment: '${{ parameters.EnvName }}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+
+        - task: ExtractFiles@1
+          displayName: 'Unzip API'
+          inputs:
+            archiveFilePatterns: '$(Pipeline.Workspace)/PortalApi/*.zip'
+            destinationFolder: '$(Pipeline.Workspace)/PortalApi/Unzipped'
+            cleanDestinationFolder: true
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Set Portal API AppSettings'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/Portal.AppSettings.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Portal.WebSite.AppSettings.$(Environment.Name).json'
+
+        - task: AzureRmWebAppDeployment@4
+          displayName: 'Deploy Api to Production'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            WebAppName: '$(Environment.Name)-PortalApi'
+            deployToSlotOrASE: true
+            ResourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            packageForLinux: '$(Pipeline.Workspace)/PortalApi/Unzipped'
+            enableCustomDeployment: true
+            TakeAppOfflineFlag: false
+            RemoveAdditionalFilesFlag: true
+            ExcludeFilesFromAppDataFlag: false

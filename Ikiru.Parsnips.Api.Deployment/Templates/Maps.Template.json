@@ -1,0 +1,23 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "mapsName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Azure Maps service to create."
+      }
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('mapsName')]",
+      "type": "Microsoft.Maps/accounts",
+      "location": "global",
+      "apiVersion": "2018-05-01",
+      "sku": {
+        "name": "S0"
+      }
+    }
+  ]
+}

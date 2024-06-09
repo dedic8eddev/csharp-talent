@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "value": "Live-PortalApi"
+    },
+    "identityServerBaseUrl": {
+      "value": "https://identity.talentis.global/"
+    },
+    "identityServerClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "Live-IdentityServerAdminApiClientSecret"
+      }
+    },
+    "dataPoolBaseUrl": {
+      "value": "https://api-datapool.talentis.global/"
+    },
+    "enableSwagger": {
+      "value": false
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "functionsName": {
+      "value": "Live-ParsnipsApiFunctions"
+    },
+    "planName": {
+      "value": "Live-ParsnipsApiFunctionsAppPlan"
+    },
+    "storageAccountName": {
+      "value": "liveparsnipsapistorage"
+    },
+    "cosmosDbAccountName": {
+      "value": "liveparsnipscosmosdb"
+    },
+    "sovrenAccountId": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "SovrenAccountId"
+      }
+    },
+    "sovrenAccountKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "SovrenAccountKey"
+      }
+    },
+    "smtpUsername": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "AwsSmtpUsername"
+      }
+    },
+    "smtpPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "AwsSmtpPassword"
+      }
+    },
+    "talentisAppBaseUrl": {
+      "value": "https://app.talentis.global"
+    },
+    "azureMapsName": {
+      "value": "Live-ParsnipsMaps"
+    },
+    "insightsDeveloperMode": {
+      "value": "true"
+    },
+    "alwaysOn": {
+      "value": false
+    },
+    "alertsActionGroupName": {
+      "value": "Live-ParsnipsActionGroup"
+    },
+    "alertsNoRequestsThresholdMinutes": {
+      "value": 2880
+    },
+    "chargebeeSettingsSiteName": {
+      "value": "talentis"
+    },
+    "chargebeeSettingsApiKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "Live-ChargebeeApiKey"
+      }
+    },
+    "chargebeeTrialEndsOn": {
+      "value": "20210101"
+    },
+    "chargebeeTrialLengthMonths": {
+      "value": 1
+    },
+    "identityServerBaseUrl": {
+      "value": "https://identity.talentis.global/"
+    },
+    "identityServerClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/f81f8f6e-e744-4059-b7d1-815f0cf46d5a/resourceGroups/LiveParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/LiveParsnipsDeploymentKV"
+        },
+        "secretName": "Live-IdentityServerAdminApiClientSecret"
+      }
+    }
+  }
+}

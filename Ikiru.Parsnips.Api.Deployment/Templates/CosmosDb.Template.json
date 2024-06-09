@@ -1,0 +1,357 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Cosmos DB account name, max length 44 characters"
+      }
+    },
+    "secondaryEnabled": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Whether to enable the secondary replication" 
+      }
+    },
+    "secondaryRegion": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The secondary replica region for the Cosmos DB account."
+      }
+    },
+    "defaultConsistencyLevel": {
+      "type": "string",
+      "defaultValue": "Session",
+      "allowedValues": [ "Eventual", "ConsistentPrefix", "Session", "BoundedStaleness", "Strong" ],
+      "metadata": {
+        "description": "The default consistency level of the Cosmos DB account."
+      }
+    },
+    "sharedThroughput": {
+      "type": "int",
+      "defaultValue": 700,
+      "minValue": 700,
+      "maxValue": 1000000,
+      "metadata": {
+        "description": "The throughput for the database to be shared - Min is actually 400 but > 4 shared containers will require 100 RU added per container e.g. 600 for 6 shared containers"
+      }
+    },
+    "maxStalenessPrefix": {
+      "type": "int",
+      "minValue": 10,
+      "defaultValue": 100000,
+      "maxValue": 2147483647,
+      "metadata": {
+        "description": "Max stale requests. Required for BoundedStaleness. Valid ranges, Single Region: 10 to 1000000. Multi Region: 100000 to 1000000."
+      }
+    },
+    "maxIntervalInSeconds": {
+      "type": "int",
+      "minValue": 5,
+      "defaultValue": 300,
+      "maxValue": 86400,
+      "metadata": {
+        "description": "Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Region: 5 to 84600. Multi Region: 300 to 86400."
+      }
+    }
+  },
+  "variables": {
+    "accountName": "[toLower(parameters('accountName'))]",
+    "databaseName": "Parsnips",
+    "personsContainerName": "Persons",
+    "importsContainerName": "Imports",
+    "assignmentsContainerName": "Assignments",
+    "candidatesContainerName": "Candidates",
+    "searchFirmContainerName": "SearchFirms",
+    "personNotesContainerName": "Person_Notes",
+    "subscriptionsContainerName": "Subscriptions",
+    "primaryLocation": [
+      {
+        "locationName": "[resourceGroup().location]",
+        "failoverPriority": 0,
+        "isZoneRedundant": false
+      }
+    ],
+    "additionalLocations": [
+      {
+        "locationName": "[parameters('secondaryRegion')]",
+        "failoverPriority": 1,
+        "isZoneRedundant": false
+      }
+    ],
+    "emptyLocations": [],
+    "consistencyPolicy": {
+      "Eventual": {
+        "defaultConsistencyLevel": "Eventual"
+      },
+      "ConsistentPrefix": {
+        "defaultConsistencyLevel": "ConsistentPrefix"
+      },
+      "Session": {
+        "defaultConsistencyLevel": "Session"
+      },
+      "BoundedStaleness": {
+        "defaultConsistencyLevel": "BoundedStaleness",
+        "maxStalenessPrefix": "[parameters('maxStalenessPrefix')]",
+        "maxIntervalInSeconds": "[parameters('maxIntervalInSeconds')]"
+      },
+      "Strong": {
+        "defaultConsistencyLevel": "Strong"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "name": "[variables('accountName')]",
+      "apiVersion": "2019-12-12",
+      "kind": "GlobalDocumentDB",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "consistencyPolicy": "[variables('consistencyPolicy')[parameters('defaultConsistencyLevel')]]",
+        "locations": "[concat(variables('primaryLocation'), if(parameters('secondaryEnabled'), array('additionalLocations'), variables('emptyLocations')) )]",
+        "databaseAccountOfferType": "Standard",
+        "enableMultipleWriteLocations": false
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('accountName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('databaseName')]"
+        },
+        "options": { "throughput": "[parameters('sharedThroughput')]" }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('personsContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('personsContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/SearchFirmId"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          },
+          "uniqueKeyPolicy": {
+            "uniqueKeys": [
+              {
+                "paths": [ "/LinkedInProfileId" ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('importsContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('importsContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/SearchFirmId"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('searchFirmContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('searchFirmContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/SearchFirmId"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('assignmentsContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('assignmentsContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/SearchFirmId"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('candidatesContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('candidatesContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/SearchFirmId"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('personNotesContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('personNotesContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/SearchFirmId"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[concat(variables('accountName'), '/', variables('databaseName'), '/', variables('subscriptionsContainerName'))]",
+      "apiVersion": "2019-12-12",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('accountName'), variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('subscriptionsContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/PartitionKey"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

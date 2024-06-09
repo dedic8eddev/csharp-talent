@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DomainModel\DumbPoint.cs" />
+    <Compile Remove="DomainModel\Note.cs" />
+    <Compile Remove="DomainModel\Person.cs" />
+    <Compile Remove="DomainModel\PersonGdprLawfulBasisState.cs" />
+    <Compile Remove="DomainModel\PersonWebsite.cs" />
+    <Compile Remove="DomainModel\ScrapedDataForPerson.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+</Project>

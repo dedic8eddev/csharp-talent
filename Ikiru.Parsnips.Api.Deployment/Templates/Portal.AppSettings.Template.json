@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the WebApp the settings are for."
+      }
+    },
+
+    "identityServerBaseUrl": {
+      "type": "string"
+    },
+    "identityServerClientSecret": {
+      "type": "securestring"
+    },
+
+    "dataPoolBaseUrl": {
+      "type": "string"
+    },
+
+    "enableSwagger": {
+      "type": "bool"
+    }
+  },
+  "variables": {
+    "insightsName": "[concat(parameters('webSiteName'), 'Insights')]",
+    "stagingSlotName": "Production"
+  },
+  "resources": [
+    {
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('webSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "properties": {
+      },
+      "resources": [
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2021-02-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('webSiteName'))]"
+          ],
+          "tags": {
+            "displayName": "WebAppSettings"
+          },
+          "properties": {
+            "ApplicationInsights:InstrumentationKey": "[reference(resourceId('Microsoft.Insights/components', variables('insightsName')), '2014-04-01').InstrumentationKey]",
+            "IdentityAdminApiSettings:BaseUrl": "[parameters('identityServerBaseUrl')]",
+            "BearerTokenAuthSettings:Authority": "[parameters('identityServerBaseUrl')]",
+            "EnableSwagger": "[parameters('enableSwagger')]",
+            "DataPoolApiSettings:AuthServerBaseUrl": "[parameters('identityServerBaseUrl')]",
+            "DataPoolApiSettings:BaseUrl": "[parameters('dataPoolBaseUrl')]",
+            "DataPoolApiSettings:ClientSecret": "[parameters('identityServerClientSecret')]"
+          }
+        }
+      ]
+    }
+  ]
+}

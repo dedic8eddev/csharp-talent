@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
+    <PackageReference Include="Azure.Storage.Queues" Version="12.8.0" />
+    <PackageReference Include="chargebee" Version="2.8.3" />
+    <PackageReference Include="FluentValidation" Version="8.6.2" />
+    <PackageReference Include="MailKit" Version="2.8.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.18.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.21.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="4.0.5" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.9" />
+    <PackageReference Include="Polly" Version="7.1.0" />
+    <PackageReference Include="refit" Version="5.1.67" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="5.1.67" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ikiru.Parsnips.Application\Ikiru.Parsnips.Application.csproj" />
+    <ProjectReference Include="..\Ikiru.Parsnips.DomainInfrastructure\Ikiru.Parsnips.DomainInfrastructure.csproj" />
+    <ProjectReference Include="..\Ikiru.Parsnips.Domain\Ikiru.Parsnips.Domain.csproj" />
+    <ProjectReference Include="..\Ikiru.Parsnips.Shared.Infrastructure\Ikiru.Parsnips.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+    <None Update="appsettings.Development.json">
+      <DependentUpon>appsettings.json</DependentUpon>     
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+    <None Update="Email\EmailTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+</Project>

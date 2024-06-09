@@ -1,0 +1,48 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "planName": {
+      "value": "Dev-ParsnipsApiAppPlan"
+    },
+    "skuName": {
+      "value": "S1"
+    },
+    "scaleEnabled": {
+      "value": false
+    },
+    "scaleDefaultInstances": {
+      "value": 1
+    },
+    "scaleMinInstances": {
+      "value": 1
+    },
+    "scaleMaxInstances": {
+      "value": 2
+    },
+    "scaleUpCpuPercentage": {
+      "value": 75
+    },
+    "scaleUpTimeWindow": {
+      "value": "PT10M"
+    },
+    "scaleUpIncreaseInstancesBy": {
+      "value": 1
+    },
+    "scaleUpCoolDown": {
+      "value": "PT10M"
+    },
+    "scaleDownCpuPercentage": {
+      "value": 75
+    },
+    "scaleDownTimeWindow": {
+      "value": "PT10M"
+    },
+    "scaleDownDecreaseInstancesBy": {
+      "value": 1
+    },
+    "scaleDownCoolDown": {
+      "value": "PT10M"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "functionsName": {
+      "value": "Dev-ParsnipsApiFunctions"
+    },
+    "planName": {
+      "value": "Dev-ParsnipsApiFunctionsAppPlan"
+    },
+    "storageAccountName": {
+      "value": "devparsnipsapistorage"
+    },
+    "cosmosDbAccountName": {
+      "value": "devparsnipscosmosdb"
+    },
+    "sovrenAccountId": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "SovrenAccountId"
+      }
+    },
+    "sovrenAccountKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "SovrenAccountKey"
+      }
+    },
+    "smtpUsername": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "AwsSmtpUsername"
+      }
+    },
+    "smtpPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "AwsSmtpPassword"
+      }
+    },
+    "talentisAppBaseUrl": {
+      "value": "https://dev-app.talentis.global"
+    },
+    "azureMapsName": {
+      "value": "Dev-ParsnipsMaps"
+    },
+    "insightsDeveloperMode": {
+      "value": "true"
+    },
+    "alwaysOn": {
+      "value": false
+    },
+    "alertsActionGroupName": {
+      "value": "Dev-ParsnipsActionGroup"
+    },
+    "alertsNoRequestsThresholdMinutes": {
+      "value": 2880
+    },
+    "chargebeeSettingsSiteName": {
+      "value": "talentis-test"
+    },
+    "chargebeeSettingsApiKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "Dev-ChargebeeApiKey"
+      }
+    },
+    "chargebeeTrialEndsOn": {
+      "value": "20210101"
+    },
+    "chargebeeTrialLengthMonths": {
+      "value": 1
+    },
+    "identityServerBaseUrl": {
+      "value": "https://dev-is-app.talentis.global/"
+    },
+    "identityServerClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "Dev-IdentityServerAdminApiClientSecret"
+      }
+    }
+  }
+}

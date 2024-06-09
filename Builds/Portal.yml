@@ -1,0 +1,71 @@
+name: 1.0$(rev:.r).0
+
+trigger:
+  branches:
+    include:
+      - master
+
+variables:
+  buildConfiguration: Release
+
+stages:
+  - stage: BuildandTest
+
+    pool:
+      vmImage: "windows-latest"
+
+    jobs:
+      - job: BuildApi
+        displayName: "Build Portal Api"
+        workspace:
+          clean: all
+
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Restore packages
+            inputs:
+              command: restore
+              feedsToUse: 'select'
+              vstsFeed: 'IkiruPeopleArtifactsFeed'
+              projects: "Ikiru.Parsnips.Portal.Api/Ikiru.Parsnips.Portal.Api.csproj"
+              includeNuGetOrg: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish Portal Api
+            inputs:
+              command: publish
+              publishWebProjects: false
+              projects: "Ikiru.Parsnips.Portal.Api/Ikiru.Parsnips.Portal.Api.csproj"
+              arguments: '-c $(buildConfiguration) -v diag -o $(Build.ArtifactStagingDirectory)\PORTAL_API /p:Version=$(Build.BuildNumber) --no-restore'
+              
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact: PortalApi"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\PORTAL_API'
+              ArtifactName: PortalApi
+
+
+      - job: PublishArm
+        displayName: "Publish ARM Templates"
+
+        steps:
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact: ARM_Templates"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\Ikiru.Parsnips.Api.Deployment\'
+              ArtifactName: ARM_Templates
+
+  - template: Portal_Deploy.yml
+    parameters:
+      EnvName: Dev
+      AzureSub: "FP Development"
+
+  - template: Portal_Deploy.yml
+    parameters:
+      EnvName: Test
+      AzureSub: "FP Development"
+      
+  - template: Portal_Deploy.yml
+    parameters:
+      EnvName: Live
+      AzureSub: "FP Production"

@@ -1,0 +1,66 @@
+{
+  " id": "ev_16BjmsSPpSmoIAj2",
+  "occurred_at": 1614070371,
+  "source": "admin_console",
+  "user": "nick.leonard@ikirupeople.com",
+  "object": "event",
+  "api_version": "v2",
+  "content": {
+    "plan": {
+      "id": "talentis-connect-a-aud",
+      "name": "Talentis  Connect A  AUD",
+      "invoice_name": "Talentis Connect",
+      "price": 108000,
+      "period": 1,
+      "period_unit": "year",
+      "pricing_model": "per_unit",
+      "free_quantity": 0,
+      "status": "active",
+      "enabled_in_hosted_pages": true,
+      "enabled_in_portal": false,
+      "addon_applicability": "all",
+      "is_shippable": false,
+      "updated_at": 1614070371,
+      "giftable": false,
+      "resource_version": 1614070371101,
+      "object": "plan",
+      "charge_model": "per_unit",
+      "taxable": true,
+      "currency_code": "AUD",
+      "event_based_addons": [
+        {
+          "id": "enable-rocket-reach-purchase-aud",
+          "quantity": 1,
+          "on_event": "subscription_creation",
+          "charge_once": true,
+          "object": "event_based_addon"
+        }
+      ],
+      "show_description_in_invoices": false,
+      "show_description_in_quotes": false,
+      "meta_data": {
+        "plan": "connect",
+        "default_tokens": 40
+      }
+    }
+  },
+  "event_type": "plan_updated",
+  "webhook_status": "scheduled",
+  "webhooks": [
+    {
+      "id": "whv2_169mBgSIgYLehh5a",
+      "webhook_status": "scheduled",
+      "object": "webhook"
+    },
+    {
+      "id": "whv2_16BjkWSGbZXG7Lcd",
+      "webhook_status": "scheduled",
+      "object": "webhook"
+    },
+    {
+      "id": "whv2_16BjkWSGbZchKLe7",
+      "webhook_status": "scheduled",
+      "object": "webhook"
+    }
+  ]
+}

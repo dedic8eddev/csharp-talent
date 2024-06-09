@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.8.4" />
+    <PackageReference Include="Azure.Storage.Queues" Version="12.6.2" />
+    <PackageReference Include="FluentValidation" Version="8.6.2" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.14.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.18.0" />
+    <PackageReference Include="Microsoft.Azure.Search.Data" Version="10.1.0" />
+    <PackageReference Include="Moq" Version="4.14.5" />
+    <PackageReference Include="Refit" Version="5.1.67" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ikiru.Parsnips.Application\Ikiru.Parsnips.Application.csproj" />
+    <ProjectReference Include="..\Ikiru.Parsnips.DomainInfrastructure\Ikiru.Parsnips.DomainInfrastructure.csproj" />
+    <ProjectReference Include="..\Ikiru.Parsnips.Persistence\Ikiru.Parsnips.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

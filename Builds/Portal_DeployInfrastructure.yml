@@ -1,0 +1,39 @@
+parameters:
+- name: 'EnvName'
+- name: 'AzureSub'
+
+jobs:
+- deployment: '${{ parameters.EnvName }}DeployInfrastructure' # Name referenced from DeployApps Template
+  displayName: '${{ parameters.EnvName }} - Deploy Infrastructure'
+
+  pool:
+    vmImage: 'windows-latest'
+    
+  # Allow Skipping of this Stage via Pipeline variable (set in DevOps UI)
+  condition: and(succeeded(), eq(variables['deployInfrastructure'], 'True'))
+
+  environment: '${{ parameters.EnvName }}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+          artifact: ARM_Templates
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Portal Insights'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/Insights.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Portal.Insights.$(Environment.Name).json'
+
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'Create Portal Service'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            resourceGroupName: $(Environment.Name)-ParsnipsResGrp
+            location: 'UK South'
+            csmFile: '$(Pipeline.Workspace)/ARM_Templates/Templates/WebSite.Template.json'
+            csmParametersFile: '$(Pipeline.Workspace)/ARM_Templates/Portal.WebSite.$(Environment.Name).json'

@@ -1,0 +1,67 @@
+name: FP_API_CLEAN_$(date:yyyyMMdd)$(rev:.r)
+
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+    - master
+  always: true
+
+trigger: none
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  deploymentProjectFolder: 'Ikiru.Parsnips.Api.Deployment'
+  resourceGroupSuffix: 'ParsnipsResGrp'
+
+# Not using Deployment Jobs else they will require manual Approval for some environments.
+# Using separate Jobs to run them in parallel.
+stages:
+- stage: 'CleanEnvironments'
+  displayName: 'Clean Environments'
+  
+  jobs:
+  - job: 'CleanDev'
+    displayName: 'Clean Dev'
+    timeoutInMinutes: 0
+
+    steps:  
+    - task: AzurePowerShell@5
+      displayName: 'Delete old Dev Resource Group Deployments'
+      inputs:
+        azureSubscription: 'FP Development'
+        ScriptPath: '$(Build.SourcesDirectory)/$(deploymentProjectFolder)/Scripts/CleanDeployments.ps1'
+        ScriptArguments: '-ResourceGroupName Dev-$(resourceGroupSuffix)'
+        azurePowerShellVersion: LatestVersion
+        pwsh: true
+
+  - job: 'CleanTest'
+    displayName: 'Clean Test'
+    timeoutInMinutes: 0
+
+    steps:  
+    - task: AzurePowerShell@5
+      displayName: 'Delete old Test Resource Group Deployments'
+      inputs:
+        azureSubscription: 'FP Development'
+        ScriptPath: '$(Build.SourcesDirectory)/$(deploymentProjectFolder)/Scripts/CleanDeployments.ps1'
+        ScriptArguments: '-ResourceGroupName Test-$(resourceGroupSuffix)'
+        azurePowerShellVersion: LatestVersion
+        pwsh: true
+
+  - job: 'CleanLive'
+    displayName: 'Clean Live'
+    timeoutInMinutes: 0
+
+    steps:  
+    - task: AzurePowerShell@5
+      displayName: 'Delete old Live Resource Group Deployments'
+      inputs:
+        azureSubscription: 'FP Production'
+        ScriptPath: '$(Build.SourcesDirectory)/$(deploymentProjectFolder)/Scripts/CleanDeployments.ps1'
+        ScriptArguments: '-ResourceGroupName Live-$(resourceGroupSuffix) -Days 180'
+        azurePowerShellVersion: LatestVersion
+        pwsh: true

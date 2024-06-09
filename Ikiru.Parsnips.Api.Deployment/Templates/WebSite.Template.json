@@ -1,0 +1,291 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name for the WebApp."
+      }
+    },
+    "planName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the App Plan that the website should be in."
+      }
+    },
+    "webSiteCustomDomainNames": {
+      "type": "array",
+      "minLength": 1,
+      "metadata": {
+        "description": "The custom Domain Names for the WebApp (note SSL Binding only works for first one - currently)."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Storage Account to link to."
+      }
+    },
+    "cosmosDbAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the CosmosDb Account to link to."
+      }
+    },
+
+    /* SSL CERT */
+
+    "certificateBase64": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The PFX Certificate file content in base64."
+      }
+    },
+    "certificatePassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the Certificate PFX file."
+      }
+    },
+
+    /* INFRASTRUCTURE */
+
+    "webSocketsEnable": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "corsAllowedOrigins": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "CORS Allowed Origins"
+      }
+    },
+
+    "insightsDeveloperMode": {
+      "type": "string"
+    },
+
+    "alwaysOn": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Azure WebSite Always On, no warmup required."
+      }
+    },
+    "webTestEnabled": {
+      "type": "bool"
+    },
+    "webTestUrl": {
+      "type": "string"
+    },
+    "webTestExpectedResponseCode": {
+      "type": "int"
+    },
+    "actionGroupName": {
+      "type": "string"
+    },
+    "slotsEnabled": {
+      "type": "bool",
+      "defaultValue": false
+    }
+  },
+  "variables": {
+    "insightsName": "[concat(parameters('webSiteName'), 'Insights')]",
+    "storageAccountNameLower": "[toLower(parameters('storageAccountName'))]",
+    "storageAccountId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountNameLower'))]",
+    "certificateResourceName": "WildcardCert",
+    "webTestName": "[concat(parameters('webSiteName'), 'WebTest')]",
+    "actionGroupId": "[resourceId('microsoft.insights/actionGroups', parameters('actionGroupName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/certificates",
+      "name": "[variables('certificateResourceName')]",
+      "apiVersion": "2016-03-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+      ],
+      "properties": {
+        "pfxBlob": "[parameters('certificateBase64')]",
+        "password": "[parameters('certificatePassword')]"
+      }
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "name": "[concat(parameters('websiteName'),'/',parameters('webSiteCustomDomainNames')[copyIndex()])]",
+      "type": "Microsoft.Web/sites/hostNameBindings",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/certificates', variables('certificateResourceName'))]"
+      ],
+      "properties": {
+        "domainId": null,
+        "hostNameType": "Verified",
+        "siteName": "parameters('websiteName')",
+        "sslState": "SniEnabled",
+        "thumbprint": "[reference(resourceId('Microsoft.Web/certificates', variables('certificateResourceName'))).Thumbprint]"
+      },
+      "copy": {
+        "name": "bindingsCopy",
+        "count": "[length(parameters('webSiteCustomDomainNames'))]",
+        "mode": "Serial",
+        "batchSize": 1
+      }
+    },
+    {
+      "apiVersion": "2018-11-01",
+      "name": "[parameters('webSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('planName'))]": "Resource",
+        "displayName": "Website"
+      },
+      "properties": {
+        "name": "[parameters('webSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('planName'))]",
+        "clientAffinityEnabled": false,
+        "httpsOnly": true,
+        "siteConfig": {
+          "alwaysOn": "[parameters('alwaysOn')]",
+          "connectionStrings": [
+            {
+              "name": "StorageConnection",
+              "connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountNameLower'),';AccountKey=',listKeys(variables('storageAccountId'), '2015-05-01-preview').key1)]",
+              "type": 3
+            },
+            {
+              "name": "CosmosConnection",
+              "connectionString": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2019-12-12').connectionStrings[0].connectionString]",
+              "type": 3
+            }
+          ],
+          "webSocketsEnabled": "[parameters('webSocketsEnable')]",
+          "cors": {
+            "allowedOrigins": "[parameters('corsAllowedOrigins')]"
+          }
+        },
+        "enabled": true
+      },
+      "resources": [
+        {
+          "name": "web",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+          ],
+          "tags": {
+            "displayName": "Allowed IPs"
+          },
+          "properties": {
+            "ipSecurityRestrictions": []
+          }
+        },
+        {
+          "condition": "[parameters('slotsEnabled')]",
+          "type": "slots",
+          "apiVersion": "2015-08-01",
+          "name": "staging",
+          "tags": {
+            "displayName": "Staging Slot"
+          },
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+          ],
+          "properties": {
+          },
+          "resources": []
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/webtests",
+      "apiVersion": "2015-05-01",
+      "name": "[variables('webTestName')]",
+      "location": "North Europe",
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', variables('insightsName')))]": "Resource",
+        "[concat('hidden-link:', resourceId('microsoft.web/sites/', parameters('webSiteName')))]": "Resource"
+      },
+      "properties": {
+        "SyntheticMonitorId": "[variables('webTestName')]",
+        "Name": "[variables('webTestName')]",
+        "Description": "",
+        "Enabled": "[parameters('webTestEnabled')]",
+        "Frequency": 300,
+        "Timeout": 30,
+        "Kind": "ping",
+        "RetryEnabled": true,
+        "Locations": [
+          {
+            "Id": "us-ca-sjc-azr"
+          },
+          {
+            "Id": "emea-ru-msa-edge"
+          },
+          {
+            "Id": "apac-sg-sin-azr"
+          },
+          {
+            "Id": "emea-gb-db3-azr"
+          },
+          {
+            "Id": "us-va-ash-azr"
+          },
+          {
+            "Id": "latam-br-gru-edge"
+          },
+          {
+            "Id": "emea-au-syd-edge"
+          }
+        ],
+        "Configuration": {
+          "WebTest": "[concat('<WebTest Name=\"', variables('webTestName'), '\" Id=\"1ac24035-29f0-4c41-9061-057ec86b2086\" Enabled=\"True\" CssProjectStructure=\"\" CssIteration=\"\" Timeout=\"30\" WorkItemIds=\"\" xmlns=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\" Description=\"\" CredentialUserName=\"\" CredentialPassword=\"\" PreAuthenticate=\"True\" Proxy=\"default\" StopOnError=\"False\" RecordedResultFile=\"\" ResultsLocale=\"\"><Items><Request Method=\"GET\" Guid=\"af1a4273-de7c-dec1-ebbe-46f475097c3d\" Version=\"1.1\" Url=\"', parameters('webTestUrl'), '\" ThinkTime=\"0\" Timeout=\"30\" ParseDependentRequests=\"True\" FollowRedirects=\"True\" RecordResult=\"True\" Cache=\"False\" ResponseTimeGoal=\"0\" Encoding=\"utf-8\" ExpectedHttpStatusCode=\"', parameters('webTestExpectedResponseCode'), '\" ExpectedResponseUrl=\"\" ReportingName=\"\" IgnoreHttpStatusCode=\"False\" /></Items></WebTest>')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2018-03-01",
+      "name": "[concat(variables('webTestName'), 'Alert')]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "location": "global",
+      "tags": {
+        "[concat('hidden-link:', resourceId('microsoft.insights/components/', variables('insightsName')))]": "Resource",
+        "[concat('hidden-link:', resourceId('microsoft.insights/webtests/', variables('webTestName')))]": "Resource"
+      },
+      "dependsOn": [
+        "[resourceId('microsoft.insights/webtests/', variables('webTestName'))]"
+      ],
+      "properties": {
+        "name": "[concat(variables('webTestName'), 'Alert')]",
+        "description": "[concat('Alert for ', variables('webTestName'))]",
+        "Enabled": "[parameters('webTestEnabled')]",
+        "scopes": [
+          "[resourceId('microsoft.insights/webtests', variables('webTestName'))]",
+          "[resourceId('microsoft.insights/components', variables('insightsName'))]"
+        ],
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT5M",
+		"severity": "2",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria",
+          "webTestId": "[resourceId('microsoft.insights/webtests', variables('webTestName'))]",
+          "componentId": "[resourceId('microsoft.insights/components', variables('insightsName'))]",
+          "failedLocationCount": 2
+        },
+        "actions": [
+          {
+            "actionGroupId": "[variables('actionGroupId')]"
+          }
+        ]
+      }
+    }
+  ]
+}

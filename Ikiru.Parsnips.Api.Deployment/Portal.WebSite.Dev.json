@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "value": "Dev-PortalApi"
+    },
+    "planName": {
+      "value": "Dev-ParsnipsApiAppPlan"
+    },
+    "webSiteCustomDomainNames": {
+      "value": [
+        "dev-api-portal.talentis.global"
+      ]
+    },
+
+    "certificateBase64": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "TalentisWildcardCert"
+      }
+    },
+    "certificatePassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/af165385-a455-4999-9600-c0322d36c703/resourceGroups/InternalParsnipsDeploymentResGrp/providers/Microsoft.KeyVault/vaults/IntParsnipsDeploymentKV"
+        },
+        "secretName": "TalentisWildcardCertPassword"
+      }
+    },
+    "storageAccountName": {
+      "value": "devparsnipsapistorage"
+    },
+    "cosmosDbAccountName": {
+      "value": "devparsnipscosmosdb"
+    },
+    "corsAllowedOrigins": {
+      "value": [
+        "*"
+      ]
+    },
+    "insightsDeveloperMode": {
+      "value": "true"
+    },
+    "alwaysOn": {
+      "value": true
+    },
+    "webTestEnabled": {
+      "value": false
+    },
+    "webTestUrl": {
+      "value": "https://dev-api-portal.talentis.global/"
+    },
+    "webTestExpectedResponseCode": {
+      "value": 401
+    },
+    "actionGroupName": {
+      "value": "Dev-ParsnipsActionGroup"
+    },
+    "slotsEnabled": {
+      "value": false
+    }
+  }
+}

@@ -1,0 +1,40 @@
+parameters:
+- name: 'EnvName'
+- name: 'AzureSub'
+- name: 'DropIfExists'
+
+jobs:
+- deployment: '${{ parameters.EnvName }}DeploySearchIndexes' # Name referenced from DeployApps Template
+  displayName: '${{ parameters.EnvName }} - Deploy Search Indexes'
+  
+  # Run only once Infrastructure completed (Jobs by default run in parallel)
+  dependsOn: '${{ parameters.EnvName }}DeployInfrastructure' # References DeployInfrastructure Template value
+  condition: in(dependencies['${{ parameters.EnvName }}DeployInfrastructure'].result, 'Succeeded', 'Skipped')
+
+  pool:
+    vmImage: 'windows-latest'
+    
+  environment: '${{ parameters.EnvName }}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+          artifact: ARM_Templates
+
+
+        - task: PowerShell@2
+          displayName: Install power shell Cosmos library
+          inputs:
+            targetType: 'inline'
+            script: Install-Module -Name Az.CosmosDB -Force -Verbose -Scope CurrentUser
+            failOnStderr: true
+
+        - task: AzurePowerShell@5
+          displayName: 'Create Search Cosmos Indexes'
+          inputs:
+            azureSubscription: '${{ parameters.AzureSub }}'
+            ScriptPath: '$(Pipeline.Workspace)/ARM_Templates/SearchService.CosmosIndexes.$(Environment.Name).ps1'
+            ScriptArguments: '-ResourceGroupName $(Environment.Name)-ParsnipsResGrp -DropIfExists:${{ parameters.DropIfExists }}'
+            azurePowerShellVersion: LatestVersion
+            pwsh: true

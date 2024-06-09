@@ -1,0 +1,120 @@
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Ikiru.Parsnips.IntegrationTests.Helpers;
+using Ikiru.Parsnips.IntegrationTests.Helpers.Data;
+using Ikiru.Parsnips.IntegrationTests.Helpers.HttpMessages;
+using Ikiru.Parsnips.Domain;
+using Ikiru.Parsnips.Shared.Infrastructure.Storage.Blobs;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace Ikiru.Parsnips.IntegrationTests.Features.Api.Persons.Photo
+{
+    [Collection(nameof(IntegrationTestCollection))]
+    public class PhotoTests : IntegrationTestBase, IClassFixture<PhotoTests.PhotoTestsClassFixture>
+    {
+        private readonly PhotoTestsClassFixture m_ClassFixture;
+
+        public PhotoTests(IntegrationTestFixture fixture, PhotoTestsClassFixture classFixture, ITestOutputHelper output) : base(fixture, output)
+        {
+            m_ClassFixture = classFixture;
+        }
+
+        public class PhotoTestsClassFixture : IDisposable
+        {
+            public IntTestServer Server { get; }
+
+            // ReSharper disable once UnusedParameter.Local
+            public PhotoTestsClassFixture(IntegrationTestFixture fixture)
+            {
+                Server = new TestServerBuilder()
+                   .Build();
+            }
+
+            public void Dispose()
+            {
+                Server.Dispose();
+            }
+        }
+
+        private Person m_Person;
+
+        private async Task EnsurePersonExists()
+        {
+            const string linkedInProfileId = "photo-person";
+            m_Person = new Person(m_ClassFixture.Server.Authentication.DefaultSearchFirmId, Guid.NewGuid(), $"https://uk.linkedin.com/in/{linkedInProfileId}")
+            {
+                Name = "Photo Person"
+            };
+
+            m_Person = await m_ClassFixture.Server.AddUniqueItemIntoCosmos(TestDataManipulator.PersonsContainerName, m_Person.SearchFirmId, c => c.LinkedInProfileId == linkedInProfileId, m_Person);
+        }
+
+        [Fact]
+        public async Task PutShouldRespondWithNoContent()
+        {
+            // GIVEN
+            await EnsurePersonExists();
+            var content = CreateMultipartFileUploadContent();
+
+            // WHEN
+            var response = await m_ClassFixture.Server.Client.PutAsync($"/api/persons/{m_Person.Id}/photo", content);
+
+            // THEN
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetShouldReturnPhotoUrl()
+        {
+            // GIVEN
+            await EnsurePersonExists();
+            var content = CreateMultipartFileUploadContent();
+            var responseForPut = await m_ClassFixture.Server.Client.PutAsync($"/api/persons/{m_Person.Id}/photo", content);
+            Assert.Equal(HttpStatusCode.NoContent, responseForPut.StatusCode);
+
+            // WHEN
+            var response = await m_ClassFixture.Server.Client.GetAsync($"/api/persons/{m_Person.Id}/photo");
+
+            // THEN
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var r = new
+            {
+                Photo = new
+                {
+                    Url = ""
+                }
+            };
+
+            var responseJson = await response.Content.DeserializeToAnonymousType(r);
+            Assert.StartsWith($"http://127.0.0.1:10000/devstoreaccount1/{BlobStorage.ContainerNames.PersonsDocuments}/{m_Person.SearchFirmId}/{m_Person.Id}/photo?", responseJson.Photo.Url);
+        }
+
+        [Fact]
+        public async Task DeleteShouldRespondWithNoContent()
+        {
+            // GIVEN
+            await EnsurePersonExists();
+
+            // WHEN
+            var response = await m_ClassFixture.Server.Client.DeleteAsync($"/api/persons/{m_Person.Id}/photo");
+
+            // THEN
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        private static MultipartFormDataContent CreateMultipartFileUploadContent()
+        {
+            var multipartFormDataContent = new MultipartFormDataContent();
+            var byteArrayContent = new ByteArrayContent(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x44, 0x00, 0x00, 0x00, 0x38, 0x01, 0x03, 0x00, 0x00, 0x00, 0x7E, 0x3D, 0xCC, 0x4B, 0x00, 0x00, 0x00, 0x06, 0x50, 0x4C, 0x54, 0x45, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xA5, 0xD9, 0x9F, 0xDD, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0E, 0xC3, 0x00, 0x00, 0x0E, 0xC3, 0x01, 0xC7, 0x6F, 0xA8, 0x64, 0x00, 0x00, 0x00, 0x07, 0x74, 0x49, 0x4D, 0x45, 0x07, 0xE4, 0x05, 0x1B, 0x0E, 0x11, 0x0C, 0x5E, 0x08, 0xEE, 0xEB, 0x00, 0x00, 0x00, 0xC4, 0x49, 0x44, 0x41, 0x54, 0x28, 0xCF, 0x85, 0xD2, 0xC1, 0x0D, 0xC2, 0x30, 0x0C, 0x05, 0x50, 0x17, 0x4B, 0x70, 0xEC, 0x08, 0x5D, 0x81, 0x09, 0xDA, 0x55, 0x18, 0x81, 0x23, 0xB7, 0x82, 0x18, 0x80, 0x95, 0xC2, 0x26, 0x1D, 0x21, 0xC7, 0x1C, 0xAC, 0x18, 0x7F, 0xA7, 0xA4, 0x45, 0x2A, 0xE0, 0x43, 0xF2, 0xA4, 0xC4, 0x56, 0x64, 0x87, 0x74, 0x8E, 0x48, 0xFF, 0x44, 0x16, 0x2D, 0x24, 0x50, 0x03, 0x45, 0x08, 0x9B, 0x4E, 0xAE, 0xB1, 0x6A, 0x30, 0x85, 0x11, 0x99, 0x9D, 0xE9, 0x89, 0x1A, 0x09, 0xBA, 0x41, 0x62, 0xCA, 0x1C, 0x59, 0xA9, 0x37, 0x09, 0x5F, 0xE9, 0x42, 0xFB, 0x06, 0x22, 0x3A, 0xD2, 0x8E, 0x22, 0xA5, 0x9D, 0x57, 0x59, 0xE9, 0xBC, 0xD6, 0x7C, 0x0F, 0xF2, 0x5C, 0x57, 0xE4, 0x07, 0xF5, 0x2E, 0xD5, 0x83, 0xE6, 0xA2, 0xBC, 0x25, 0x76, 0x09, 0xAB, 0x40, 0x71, 0x25, 0x3B, 0x92, 0x46, 0xB3, 0xBD, 0x45, 0xEF, 0x9A, 0x4C, 0xED, 0x57, 0xD9, 0xF2, 0xD6, 0x69, 0x4B, 0xE3, 0xAC, 0x89, 0x7E, 0x69, 0xA9, 0x82, 0x17, 0x14, 0x59, 0x14, 0x65, 0x22, 0x2E, 0xB2, 0x96, 0x37, 0x45, 0xC9, 0x3A, 0xB0, 0x48, 0xEA, 0xA9, 0x78, 0x77, 0x91, 0xE1, 0x0A, 0xB5, 0xE3, 0xA1, 0x33, 0x85, 0xE1, 0x63, 0x32, 0xB1, 0x4E, 0x2B, 0xD5, 0x09, 0xFA, 0x54, 0xD9, 0x27, 0x1D, 0x70, 0x6D, 0xFB, 0x1F, 0xBC, 0x00, 0x77, 0x87, 0x2B, 0x35, 0x30, 0x35, 0x61, 0xBF, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82 });
+            byteArrayContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+            multipartFormDataContent.Add(byteArrayContent, "file", "photo.png");
+
+            return multipartFormDataContent;
+        }
+    }
+}

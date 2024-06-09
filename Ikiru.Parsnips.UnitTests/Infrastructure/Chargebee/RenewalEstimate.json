@@ -1,0 +1,105 @@
+{
+  "estimate": {
+    "created_at": 1624978533,
+    "object": "estimate",
+    "subscription_estimate": {
+      "id": "Azyu79SbAWPuAQvn",
+      "status": "active",
+      "next_billing_at": 1655995000,
+      "object": "subscription_estimate",
+      "currency_code": "GBP"
+    },
+    "invoice_estimate": {
+      "recurring": true,
+      "price_type": "tax_exclusive",
+      "sub_total": 2100000,
+      "total": 2520000,
+      "credits_applied": 0,
+      "amount_paid": 0,
+      "amount_due": 2520000,
+      "object": "invoice_estimate",
+      "customer_id": "AzyuClSVOsSJJVDA",
+      "line_items": [
+        {
+          "id": "li_6olzTSbjgK5t1IgQ",
+          "date_from": 1655995000,
+          "date_to": 1687531000,
+          "unit_amount": 84000,
+          "quantity": 25,
+          "amount": 2100000,
+          "pricing_model": "per_unit",
+          "is_taxed": true,
+          "tax_amount": 420000,
+          "tax_rate": 20.0,
+          "object": "line_item",
+          "subscription_id": "Azyu79SbAWPuAQvn",
+          "customer_id": "AzyuClSVOsSJJVDA",
+          "description": "TalentisConnect",
+          "entity_type": "plan",
+          "entity_id": "talentis-connect-a-gbp",
+          "discount_amount": 0,
+          "item_level_discount_amount": 0
+        },
+        {
+          "id": "li_6olzTSbjgK5w1IgR",
+          "date_from": 1655995000,
+          "date_to": 1687531000,
+          "unit_amount": 0,
+          "quantity": 1000,
+          "amount": 0,
+          "pricing_model": "per_unit",
+          "is_taxed": true,
+          "tax_amount": 0,
+          "tax_rate": 20.0,
+          "object": "line_item",
+          "subscription_id": "Azyu79SbAWPuAQvn",
+          "customer_id": "AzyuClSVOsSJJVDA",
+          "description": "RocketReachTokenGBPMonthlyAllowance",
+          "entity_type": "addon",
+          "entity_id": "rocket-reach-token-gbp-monthly",
+          "discount_amount": 0,
+          "item_level_discount_amount": 0
+        }
+      ],
+      "taxes": [
+        {
+          "object": "tax",
+          "name": "STD",
+          "description": "STD@20%",
+          "amount": 420000
+        }
+      ],
+      "line_item_taxes": [
+        {
+          "tax_name": "STD",
+          "tax_rate": 20.0,
+          "tax_juris_type": "country",
+          "tax_juris_name": "UnitedKingdom",
+          "tax_juris_code": "GB",
+          "object": "line_item_tax",
+          "line_item_id": "li_6olzTSbjgK5t1IgQ",
+          "tax_amount": 420000,
+          "is_partial_tax_applied": false,
+          "taxable_amount": 2100000,
+          "is_non_compliance_tax": false
+        },
+        {
+          "tax_name": "STD",
+          "tax_rate": 20.0,
+          "tax_juris_type": "country",
+          "tax_juris_name": "UnitedKingdom",
+          "tax_juris_code": "GB",
+          "object": "line_item_tax",
+          "line_item_id": "li_6olzTSbjgK5w1IgR",
+          "tax_amount": 0,
+          "is_partial_tax_applied": false,
+          "taxable_amount": 0,
+          "is_non_compliance_tax": false
+        }
+      ],
+      "currency_code": "GBP",
+      "round_off_amount": 0,
+      "line_item_discounts": []
+    }
+  }
+}
